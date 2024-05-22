@@ -126,7 +126,7 @@ void CSE7766Component::parse_data_() {
 
   float voltage = 0.0f;
   if (have_voltage) {
-    voltage = voltage_coeff / float(voltage_cycle) * 1.88;
+    voltage = (voltage_coeff * 1.88) / float(voltage_cycle);
     if (this->voltage_sensor_ != nullptr) {
       this->voltage_sensor_->publish_state(voltage);
     }
@@ -151,7 +151,7 @@ void CSE7766Component::parse_data_() {
       this->power_sensor_->publish_state(0.0f);
     }
   } else if (have_power) {
-    power = (power_coeff / float(power_cycle)) * 1.88;
+    power = (power_coeff * 1.88) / float(power_cycle);
     if (this->power_sensor_ != nullptr) {
       this->power_sensor_->publish_state(power);
     }
