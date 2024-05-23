@@ -5,7 +5,7 @@
 #include "esphome/components/uart/uart.h"
 
 namespace esphome {
-namespace cse7766 {
+namespace cse7766_v2r {
 
 class CSE7766Component : public Component, public uart::UARTDevice {
  public:
@@ -42,5 +42,5 @@ class CSE7766Component : public Component, public uart::UARTDevice {
   uint16_t cf_pulses_last_{0};
 };
 
-}  // namespace cse7766
+}  // namespace cse7766_v2r
 }  // namespace esphome

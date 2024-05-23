@@ -1,4 +1,4 @@
-#include "cse7766.h"
+#include "cse7766_v2r.h"
 #include "esphome/core/log.h"
 #include <cinttypes>
 #include <iomanip>
@@ -7,7 +7,7 @@
 namespace esphome {
 namespace cse7766 {
 
-static const char *const TAG = "cse7766";
+static const char *const TAG = "cse7766_v2r";
 
 void CSE7766Component::loop() {
   const uint32_t now = millis();
