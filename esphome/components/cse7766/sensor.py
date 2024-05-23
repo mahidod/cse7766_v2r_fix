@@ -9,7 +9,6 @@ from esphome.const import (
     CONF_POWER,
     CONF_POWER_FACTOR,
     CONF_VOLTAGE,
-    CONF_VOLTAGE_DIVIDER,
     DEVICE_CLASS_APPARENT_POWER,
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_ENERGY,
@@ -27,8 +26,8 @@ from esphome.const import (
 
 DEPENDENCIES = ["uart"]
 
-cse7766_ns = cg.esphome_ns.namespace("cse7766_v2r")
-CSE7766Component = cse7766_ns.class_("CSE7766_v2rComponent", cg.Component, uart.UARTDevice)
+cse7766_ns = cg.esphome_ns.namespace("cse7766")
+CSE7766Component = cse7766_ns.class_("CSE7766Component", cg.Component, uart.UARTDevice)
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -68,11 +67,10 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_POWER_FACTOR,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
-        cv.Optional(CONF_VOLTAGE_DIVIDER, default=1.0): cv.positive_float,        
     }
 ).extend(uart.UART_DEVICE_SCHEMA)
 FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
-    "cse7766_v2r", baud_rate=4800, require_rx=True
+    "cse7766", baud_rate=4800, require_rx=True
 )
 
 
@@ -99,4 +97,3 @@ async def to_code(config):
     if power_factor_config := config.get(CONF_POWER_FACTOR):
         sens = await sensor.new_sensor(power_factor_config)
         cg.add(var.set_power_factor_sensor(sens))
-    cg.add(var.set_voltage_divider(config[CONF_VOLTAGE_DIVIDER]))

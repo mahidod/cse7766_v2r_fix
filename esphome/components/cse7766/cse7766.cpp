@@ -1,4 +1,4 @@
-#include "cse7766_v2r.h"
+#include "cse7766.h"
 #include "esphome/core/log.h"
 #include <cinttypes>
 #include <iomanip>
@@ -7,7 +7,7 @@
 namespace esphome {
 namespace cse7766 {
 
-static const char *const TAG = "cse7766_v2r";
+static const char *const TAG = "cse7766";
 
 void CSE7766Component::loop() {
   const uint32_t now = millis();
@@ -126,7 +126,7 @@ void CSE7766Component::parse_data_() {
 
   float voltage = 0.0f;
   if (have_voltage) {
-    voltage = (voltage_coeff * this->voltage_divider_) / float(voltage_cycle);
+    voltage = (voltage_coeff * 1.86) / float(voltage_cycle);
     if (this->voltage_sensor_ != nullptr) {
       this->voltage_sensor_->publish_state(voltage);
     }
@@ -140,7 +140,7 @@ void CSE7766Component::parse_data_() {
     uint16_t cf_diff = cf_pulses - this->cf_pulses_last_;
     this->cf_pulses_total_ += cf_diff;
     this->cf_pulses_last_ = cf_pulses;
-    energy = this->cf_pulses_total_ * float(power_coeff * this->voltage_divider_) / 1000000.0f / 3600.0f;
+    energy = this->cf_pulses_total_ * float(power_coeff * 1.86) / 1000000.0f / 3600.0f;
     this->energy_sensor_->publish_state(energy);
   }
 
@@ -151,7 +151,7 @@ void CSE7766Component::parse_data_() {
       this->power_sensor_->publish_state(0.0f);
     }
   } else if (have_power) {
-    power = (power_coeff * this->voltage_divider_) / float(power_cycle);
+    power = (power_coeff * 1.86) / float(power_cycle);
     if (this->power_sensor_ != nullptr) {
       this->power_sensor_->publish_state(power);
     }
