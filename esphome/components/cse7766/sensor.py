@@ -9,6 +9,7 @@ from esphome.const import (
     CONF_POWER,
     CONF_POWER_FACTOR,
     CONF_VOLTAGE,
+    CONF_VOLTAGE_DIVIDER,
     DEVICE_CLASS_APPARENT_POWER,
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_ENERGY,
@@ -67,6 +68,7 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_POWER_FACTOR,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
+        cv.Optional(CONF_VOLTAGE_DIVIDER, default=1.0): cv.positive_float,        
     }
 ).extend(uart.UART_DEVICE_SCHEMA)
 FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
@@ -97,3 +99,4 @@ async def to_code(config):
     if power_factor_config := config.get(CONF_POWER_FACTOR):
         sens = await sensor.new_sensor(power_factor_config)
         cg.add(var.set_power_factor_sensor(sens))
+    cg.add(var.set_voltage_divider(config[CONF_VOLTAGE_DIVIDER]))

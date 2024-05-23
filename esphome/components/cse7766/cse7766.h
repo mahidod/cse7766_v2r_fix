@@ -17,6 +17,7 @@ class CSE7766Component : public Component, public uart::UARTDevice {
     apparent_power_sensor_ = apparent_power_sensor;
   }
   void set_power_factor_sensor(sensor::Sensor *power_factor_sensor) { power_factor_sensor_ = power_factor_sensor; }
+  void set_voltage_divider(float voltage_divider) { voltage_divider_ = voltage_divider; }
 
   void loop() override;
   float get_setup_priority() const override;
@@ -26,6 +27,7 @@ class CSE7766Component : public Component, public uart::UARTDevice {
   bool check_byte_();
   void parse_data_();
   uint32_t get_24_bit_uint_(uint8_t start_index);
+  float voltage_divider_{1.0f};
 
   uint8_t raw_data_[24];
   uint8_t raw_data_index_{0};
