@@ -126,7 +126,7 @@ void CSE7766Component::parse_data_() {
 
   float voltage = 0.0f;
   if (have_voltage) {
-    voltage = (voltage_coeff * 1.88f) / float(voltage_cycle);
+    voltage = (voltage_coeff * 1.89f) / float(voltage_cycle);
     if (this->voltage_sensor_ != nullptr) {
       this->voltage_sensor_->publish_state(voltage);
     }
@@ -140,7 +140,7 @@ void CSE7766Component::parse_data_() {
     uint16_t cf_diff = cf_pulses - this->cf_pulses_last_;
     this->cf_pulses_total_ += cf_diff;
     this->cf_pulses_last_ = cf_pulses;
-    energy = this->cf_pulses_total_ * float(power_coeff * 1.88f) / 1000000.0f / 3600.0f;
+    energy = this->cf_pulses_total_ * float(power_coeff * 1.89f) / 1000000.0f / 3600.0f;
     this->energy_sensor_->publish_state(energy);
   }
 
@@ -151,7 +151,7 @@ void CSE7766Component::parse_data_() {
       this->power_sensor_->publish_state(0.0f);
     }
   } else if (have_power) {
-    power = (power_coeff * 1.88f) / float(power_cycle);
+    power = (power_coeff * 1.89f) / float(power_cycle);
     if (this->power_sensor_ != nullptr) {
       this->power_sensor_->publish_state(power);
     }
