@@ -8,7 +8,7 @@ namespace esphome {
 namespace cse7766 {
 
 static const char *const TAG = "cse7766";
-static const float DIVIDER_R = 1.87f; //MR
+static const float DIVIDER_R = 1.88f; //MR
 
 void CSE7766Component::loop() {
   const uint32_t now = millis();
