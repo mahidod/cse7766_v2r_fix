@@ -141,7 +141,7 @@ void CSE7766Component::parse_data_() {
     uint16_t cf_diff = cf_pulses - this->cf_pulses_last_;
     this->cf_pulses_total_ += cf_diff;
     this->cf_pulses_last_ = cf_pulses;
-    energy = this->cf_pulses_total_ * float(power_coeff) * (DIVIDER_R - 0.045f) / 1000000.0f / 3600.0f;
+    energy = this->cf_pulses_total_ * float(power_coeff) * (DIVIDER_R - 0.05f) / 1000000.0f / 3600.0f;
     this->energy_sensor_->publish_state(energy);
   }
 
