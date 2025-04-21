@@ -1,0 +1,134 @@
+blueprint:
+  name: Deye WR – Verbrauchsgeführt (Hybrid Template + Blueprint)
+  description: >
+    Verbrauchsgeführte Regelung für Deye Wechselrichter mit sanfter Steuerung, Puffer, 
+    Trägheitsschutz und PV-Leistungsabgleich. Kombiniert Template-Logik und UI-Konfiguration.
+  domain: automation
+  input:
+    sensor_grid:
+      name: Verbrauch am Hauszähler (z.B. ir_lesekopf)
+      selector:
+        entity:
+          domain: sensor
+    sensor_wr_power:
+      name: Aktuelle WR-Leistung
+      selector:
+        entity:
+          domain: sensor
+    number_wr_regelung:
+      name: Deye Active Power Regulation (number)
+      selector:
+        entity:
+          domain: number
+    deye_connection:
+      name: WR Verbindung (binary_sensor)
+      selector:
+        entity:
+          domain: binary_sensor
+    zero_point_adj:
+      name: Einspeisepunkt-Verschiebung (Watt)
+      default: -10
+      selector:
+        number:
+          min: -50
+          max: 50
+          unit_of_measurement: W
+          step: 1
+    min_leistung_watt:
+      name: Minimale WR-Leistung (W)
+      default: 40
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: W
+          step: 5
+    max_leistung_watt:
+      name: Maximale WR-Leistung (W)
+      default: 800
+      selector:
+        number:
+          min: 100
+          max: 800
+          unit_of_measurement: W
+          step: 50
+    delta_prozent:
+      name: Mindeständerung (%) zum Schreiben
+      default: 2
+      selector:
+        number:
+          min: 1
+          max: 10
+          unit_of_measurement: "%"
+    taktzeit:
+      name: Regelintervall (Sekunden)
+      default: 5
+      selector:
+        number:
+          min: 3
+          max: 60
+          step: 1
+          unit_of_measurement: s
+
+trigger:
+  - platform: time_pattern
+    seconds: "/{{ taktzeit }}"
+
+condition:
+  - condition: state
+    entity_id: !input deye_connection
+    state: "on"
+
+action:
+  - variables:
+      grid_raw: "{{ states(sensor_grid) }}"
+      wr_raw: "{{ states(sensor_wr_power) }}"
+      grid: "{{ grid_raw | float(0) * -1 }}"
+      wr: "{{ wr_raw | float(0) }}"
+      max: "{{ max_leistung_watt }}"
+      min_limit: "{{ min_leistung_watt }}"
+      offset: "{{ zero_point_adj }}"
+      diff: "{{ delta_prozent }}"
+      reg_current: "{{ states(number_wr_regelung) | float(0) }}"
+
+      # Berechnung neuer WR-Leistung
+      new_limit: >
+        {% set berechnet = wr - (grid + offset) %}
+        {% if berechnet <= min_limit %}
+          {{ min_limit }}
+        {% elif berechnet >= max %}
+          {{ max }}
+        {% else %}
+          {{ berechnet }}
+        {% endif %}
+
+      # Prozentwert für WR-Regelung
+      new_percent: >
+        {% set pct = ((new_limit / max) * 100) | round(0, 'half') %}
+        {% if pct < (min_limit / max * 100) %}
+          {{ (min_limit / max * 100) | round(0, 'half') }}
+        {% else %}
+          {{ pct }}
+        {% endif %}
+
+      # Sicherheitscheck: Nur runterregeln, wenn WR es schafft
+      darf_schreiben: >
+        {% if new_percent < reg_current %}
+          {{ wr > ((new_percent / 100) * max) }}
+        {% else %}
+          true
+        {% endif %}
+
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ darf_schreiben }}"
+          - condition: template
+            value_template: >
+              {{ (new_percent - reg_current) | abs >= diff }}
+        sequence:
+          - service: number.set_value
+            target:
+              entity_id: !input number_wr_regelung
+            data:
+              value: "{{ new_percent }}"
